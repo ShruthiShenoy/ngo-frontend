@@ -2,9 +2,11 @@ import { Box, Button, Container, AppBar, Toolbar, Typography, IconButton, Menu, 
 import { useNavigate, Link as RouterLink } from 'react-router-dom';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import { useState } from 'react';
+import { useAuth } from '../contexts/AuthContext';
 
 export const DashboardNavigation = () => {
   const navigate = useNavigate();
+  const { logout } = useAuth();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const userEmail = localStorage.getItem('currentUserEmail');
 
@@ -17,8 +19,7 @@ export const DashboardNavigation = () => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('isAuthenticated');
-    localStorage.removeItem('currentUserEmail');
+    logout();
     navigate('/login');
   };
 

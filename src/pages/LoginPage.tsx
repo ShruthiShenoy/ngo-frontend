@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Box, Container, Typography, TextField, Button, Paper, Link, Alert } from '@mui/material';
 import { WebsiteHeader } from '../components/WebsiteHeader';
 import { WebsiteFooter } from '../components/WebsiteFooter';
-import { useNavigate, Link as RouterLink } from 'react-router-dom';
+import { useNavigate, Link as RouterLink, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
 interface UserData {
@@ -16,7 +16,11 @@ export const LoginPage = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
+  const location = useLocation();
   const { login } = useAuth();
+
+  // Get the return URL from location state or default to dashboard
+  const from = location.state?.from?.pathname || '/dashboard';
 
   useEffect(() => {
     // Auto-fill email if user just registered
@@ -61,8 +65,8 @@ export const LoginPage = () => {
       } else {
         login('user');
       }
-      // Redirect to dashboard page
-      navigate('/dashboard');
+      // Redirect to the return URL or dashboard
+      navigate(from, { replace: true });
     } else {
       setError('Invalid email or password');
     }

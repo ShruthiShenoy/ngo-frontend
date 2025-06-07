@@ -21,6 +21,7 @@ import ReceiptIcon from '@mui/icons-material/Receipt';
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import AssessmentIcon from '@mui/icons-material/Assessment';
 import LogoutIcon from '@mui/icons-material/Logout';
+import { useAuth } from '../contexts/AuthContext';
 
 const drawerWidth = 240;
 
@@ -33,13 +34,14 @@ export const DashboardLayout = ({ title, children }: DashboardLayoutProps) => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const { logout } = useAuth();
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('isAuthenticated');
+    logout();
     navigate('/login');
   };
 
