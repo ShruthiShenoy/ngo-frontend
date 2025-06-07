@@ -10,7 +10,7 @@ export const api = axios.create({
 
 // Mock credentials for demo
 const MOCK_CREDENTIALS = {
-  username: 'admin',
+  username: 'admin@gmail.com',
   password: 'password123',
 };
 

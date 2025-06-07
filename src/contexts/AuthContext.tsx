@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
 
 interface AuthContextType {
@@ -10,15 +10,43 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+export const useAuth = (): AuthContextType => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+};
+
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [userRole, setUserRole] = useState<string | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    return localStorage.getItem('isAuthenticated') === 'true';
+  });
+  const [userRole, setUserRole] = useState<string | null>(() => {
+    return localStorage.getItem('userRole');
+  });
+
+  useEffect(() => {
+    // Update localStorage when auth state changes
+    if (isAuthenticated) {
+      localStorage.setItem('isAuthenticated', 'true');
+    } else {
+      localStorage.removeItem('isAuthenticated');
+    }
+  }, [isAuthenticated]);
+
+  useEffect(() => {
+    // Update localStorage when role changes
+    if (userRole) {
+      localStorage.setItem('userRole', userRole);
+    } else {
+      localStorage.removeItem('userRole');
+    }
+  }, [userRole]);
 
   const login = (role: string) => {
     setIsAuthenticated(true);
     setUserRole(role);
-    localStorage.setItem('isAuthenticated', 'true');
-    localStorage.setItem('userRole', role);
   };
 
   const logout = () => {
@@ -26,6 +54,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setUserRole(null);
     localStorage.removeItem('isAuthenticated');
     localStorage.removeItem('userRole');
+    localStorage.removeItem('currentUserEmail');
   };
 
   return (
@@ -33,12 +62,4 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       {children}
     </AuthContext.Provider>
   );
-};
-
-export const useAuth = (): AuthContextType => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
 };

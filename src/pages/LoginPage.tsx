@@ -3,6 +3,7 @@ import { Box, Container, Typography, TextField, Button, Paper, Link, Alert } fro
 import { WebsiteHeader } from '../components/WebsiteHeader';
 import { WebsiteFooter } from '../components/WebsiteFooter';
 import { useNavigate, Link as RouterLink } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 
 interface UserData {
   fullName: string;
@@ -15,6 +16,7 @@ export const LoginPage = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   useEffect(() => {
     // Auto-fill email if user just registered
@@ -28,6 +30,12 @@ export const LoginPage = () => {
 
   const verifyCredentials = (email: string, password: string): boolean => {
     try {
+      // Check mock credentials first
+      if (email === 'admin@gmail.com' && password === 'password123') {
+        return true;
+      }
+      
+      // Then check registered users
       const users = JSON.parse(localStorage.getItem('users') || '[]') as UserData[];
       const user = users.find(u => u.email === email && u.password === password);
       return !!user;
@@ -47,11 +55,14 @@ export const LoginPage = () => {
 
     // Verify credentials
     if (verifyCredentials(email, password)) {
-      // Store authentication state
-      localStorage.setItem('isAuthenticated', 'true');
-      localStorage.setItem('currentUserEmail', email);
-      // Redirect to home page
-      navigate('/home');
+      // Set admin role for admin user
+      if (email === 'admin@gmail.com') {
+        login('admin');
+      } else {
+        login('user');
+      }
+      // Redirect to dashboard page
+      navigate('/dashboard');
     } else {
       setError('Invalid email or password');
     }
