@@ -36,7 +36,7 @@ export const WebsiteFooter = () => {
             <Typography variant="h6" gutterBottom sx={{ fontFamily: 'var(--font-section-header)', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
               Quick Links
             </Typography>
-            <Link component={RouterLink} to="/home" color="inherit" display="block" sx={{ mb: 1, fontFamily: 'var(--font-body)' }}>
+            <Link component={RouterLink} to="/" color="inherit" display="block" sx={{ mb: 1, fontFamily: 'var(--font-body)' }}>
               Home
             </Link>
             <Link component={RouterLink} to="/about" color="inherit" display="block" sx={{ mb: 1, fontFamily: 'var(--font-body)' }}>

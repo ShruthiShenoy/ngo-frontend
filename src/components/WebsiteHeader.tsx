@@ -20,7 +20,7 @@ import MenuIcon from '@mui/icons-material/Menu';
 import { Link as RouterLink } from 'react-router-dom';
 
 const pages = [
-  { title: 'Home', path: '/home' },
+  { title: 'Home', path: '/' },
   { title: 'About', path: '/about' },
   { title: 'Contact', path: '/contact' },
 ];

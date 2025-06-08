@@ -1,97 +1,221 @@
-import { useState, useEffect } from 'react';
-import {
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  CircularProgress,
-  Alert,
-  Button
-} from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
+import { Box, Typography, Grid, Paper, Button } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 import { DashboardLayout } from '../components/DashboardLayout';
 
-const mockInvoices = [
-  { id: 1, vendor: 'Vendor A', amount: 1000, date: '2024-03-15', status: 'Pending' },
-  { id: 2, vendor: 'Vendor B', amount: 2500, date: '2024-03-14', status: 'Approved' },
-  { id: 3, vendor: 'Vendor C', amount: 750, date: '2024-03-13', status: 'Paid' },
-];
-
 export const DashboardPage = () => {
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [invoices, setInvoices] = useState(mockInvoices);
   const navigate = useNavigate();
+  const { userRole, hasPermission } = useAuth();
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        setInvoices(mockInvoices);
-        setLoading(false);
-      } catch (err) {
-        setError('Failed to fetch data');
-        setLoading(false);
-      }
-    };
-    fetchData();
-  }, []);
+  const getDashboardContent = () => {
+    switch (userRole) {
+      case 'super_admin':
+        return (
+          <Grid container spacing={3}>
+            <Grid item xs={12} md={6}>
+              <Paper sx={{ p: 3, height: '100%', background: 'var(--color-soft)', borderRadius: 2, boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
+                <Typography variant="h6" gutterBottom sx={{ fontFamily: 'var(--font-title)', color: 'var(--color-primary)' }}>
+                  User Management
+                </Typography>
+                <Typography variant="body1" paragraph sx={{ fontFamily: 'var(--font-body)' }}>
+                  Manage users, approve volunteers, and oversee the entire system.
+                </Typography>
+                <Button
+                  variant="contained"
+                  onClick={() => navigate('/users')}
+                  sx={{
+                    background: 'var(--color-primary)',
+                    color: 'var(--color-primary-contrast)',
+                    fontFamily: 'var(--font-body)',
+                    '&:hover': { background: 'var(--color-secondary)' },
+                  }}
+                >
+                  Manage Users
+                </Button>
+              </Paper>
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <Paper sx={{ p: 3, height: '100%', background: 'var(--color-soft)', borderRadius: 2, boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
+                <Typography variant="h6" gutterBottom sx={{ fontFamily: 'var(--font-title)', color: 'var(--color-primary)' }}>
+                  Invoice Management
+                </Typography>
+                <Typography variant="body1" paragraph sx={{ fontFamily: 'var(--font-body)' }}>
+                  View and manage all invoices across the organization.
+                </Typography>
+                <Button
+                  variant="contained"
+                  onClick={() => navigate('/invoices')}
+                  sx={{
+                    background: 'var(--color-primary)',
+                    color: 'var(--color-primary-contrast)',
+                    fontFamily: 'var(--font-body)',
+                    '&:hover': { background: 'var(--color-secondary)' },
+                  }}
+                >
+                  View All Invoices
+                </Button>
+              </Paper>
+            </Grid>
+          </Grid>
+        );
+
+      case 'admin':
+        return (
+          <Grid container spacing={3}>
+            <Grid item xs={12} md={4}>
+              <Paper sx={{ p: 3, height: '100%', background: 'var(--color-soft)', borderRadius: 2, boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
+                <Typography variant="h6" gutterBottom sx={{ fontFamily: 'var(--font-title)', color: 'var(--color-primary)' }}>
+                  Invoice Management
+                </Typography>
+                <Typography variant="body1" paragraph sx={{ fontFamily: 'var(--font-body)' }}>
+                  Approve and manage invoices from volunteers.
+                </Typography>
+                <Button
+                  variant="contained"
+                  onClick={() => navigate('/invoices')}
+                  sx={{
+                    background: 'var(--color-primary)',
+                    color: 'var(--color-primary-contrast)',
+                    fontFamily: 'var(--font-body)',
+                    '&:hover': { background: 'var(--color-secondary)' },
+                  }}
+                >
+                  Manage Invoices
+                </Button>
+              </Paper>
+            </Grid>
+            <Grid item xs={12} md={4}>
+              <Paper sx={{ p: 3, height: '100%', background: 'var(--color-soft)', borderRadius: 2, boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
+                <Typography variant="h6" gutterBottom sx={{ fontFamily: 'var(--font-title)', color: 'var(--color-primary)' }}>
+                  Reports
+                </Typography>
+                <Typography variant="body1" paragraph sx={{ fontFamily: 'var(--font-body)' }}>
+                  View and manage financial reports.
+                </Typography>
+                <Button
+                  variant="contained"
+                  onClick={() => navigate('/reports')}
+                  sx={{
+                    background: 'var(--color-primary)',
+                    color: 'var(--color-primary-contrast)',
+                    fontFamily: 'var(--font-body)',
+                    '&:hover': { background: 'var(--color-secondary)' },
+                  }}
+                >
+                  View Reports
+                </Button>
+              </Paper>
+            </Grid>
+            <Grid item xs={12} md={4}>
+              <Paper sx={{ p: 3, height: '100%', background: 'var(--color-soft)', borderRadius: 2, boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
+                <Typography variant="h6" gutterBottom sx={{ fontFamily: 'var(--font-title)', color: 'var(--color-primary)' }}>
+                  Fund Management
+                </Typography>
+                <Typography variant="body1" paragraph sx={{ fontFamily: 'var(--font-body)' }}>
+                  Manage and track organization funds.
+                </Typography>
+                <Button
+                  variant="contained"
+                  onClick={() => navigate('/accounts')}
+                  sx={{
+                    background: 'var(--color-primary)',
+                    color: 'var(--color-primary-contrast)',
+                    fontFamily: 'var(--font-body)',
+                    '&:hover': { background: 'var(--color-secondary)' },
+                  }}
+                >
+                  Manage Funds
+                </Button>
+              </Paper>
+            </Grid>
+          </Grid>
+        );
+
+      case 'volunteer':
+        return (
+          <Grid container spacing={3}>
+            <Grid item xs={12} md={6}>
+              <Paper sx={{ p: 3, height: '100%', background: 'var(--color-soft)', borderRadius: 2, boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
+                <Typography variant="h6" gutterBottom sx={{ fontFamily: 'var(--font-title)', color: 'var(--color-primary)' }}>
+                  My Invoices
+                </Typography>
+                <Typography variant="body1" paragraph sx={{ fontFamily: 'var(--font-body)' }}>
+                  Create and view all submitted invoices.
+                </Typography>
+                <Button
+                  variant="contained"
+                  onClick={() => navigate('/invoices')}
+                  sx={{
+                    background: 'var(--color-primary)',
+                    color: 'var(--color-primary-contrast)',
+                    fontFamily: 'var(--font-body)',
+                    '&:hover': { background: 'var(--color-secondary)' },
+                  }}
+                >
+                  View All Invoices
+                </Button>
+              </Paper>
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <Paper sx={{ p: 3, height: '100%', background: 'var(--color-soft)', borderRadius: 2, boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
+                <Typography variant="h6" gutterBottom sx={{ fontFamily: 'var(--font-title)', color: 'var(--color-primary)' }}>
+                  My Reports
+                </Typography>
+                <Typography variant="body1" paragraph sx={{ fontFamily: 'var(--font-body)' }}>
+                  Create and view your submitted reports.
+                </Typography>
+                <Button
+                  variant="contained"
+                  onClick={() => navigate('/my-reports')}
+                  sx={{
+                    background: 'var(--color-primary)',
+                    color: 'var(--color-primary-contrast)',
+                    fontFamily: 'var(--font-body)',
+                    '&:hover': { background: 'var(--color-secondary)' },
+                  }}
+                >
+                  View My Reports
+                </Button>
+              </Paper>
+            </Grid>
+          </Grid>
+        );
+
+      default:
+        return (
+          <Typography variant="body1" sx={{ fontFamily: 'var(--font-body)' }}>
+            Please contact the administrator to set up your account.
+          </Typography>
+        );
+    }
+  };
 
   return (
     <DashboardLayout title="Dashboard">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 32 }}>
-        <h1 style={{ fontFamily: 'var(--font-title)', color: 'var(--color-primary)', margin: 0 }}>Recent Invoices</h1>
-        <Button
-          variant="contained"
-          startIcon={<AddIcon />}
+      <Box sx={{ mb: 4 }}>
+        <Typography
+          variant="h4"
+          component="h1"
+          gutterBottom
           sx={{
-            background: 'var(--color-primary)',
-            color: 'var(--color-primary-contrast)',
-            fontFamily: 'var(--font-body)',
-            '&:hover': { background: 'var(--color-secondary)' },
+            fontFamily: 'var(--font-title)',
+            color: 'var(--color-primary)',
+            fontWeight: 700,
           }}
-          onClick={() => navigate('/invoices/new')}
         >
-          New Invoice
-        </Button>
-      </div>
-      {error && (
-        <Alert severity="error" sx={{ mb: 2, fontFamily: 'var(--font-body)' }}>{error}</Alert>
-      )}
-      {loading ? (
-        <div style={{ display: 'flex', justifyContent: 'center', padding: 32 }}>
-          <CircularProgress sx={{ color: 'var(--color-primary)' }} />
-        </div>
-      ) : (
-        <TableContainer component={Paper} sx={{ background: 'var(--color-soft)', borderRadius: 2, boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell sx={{ fontFamily: 'var(--font-heading)', color: 'var(--color-primary)' }}>ID</TableCell>
-                <TableCell sx={{ fontFamily: 'var(--font-heading)', color: 'var(--color-primary)' }}>Vendor</TableCell>
-                <TableCell sx={{ fontFamily: 'var(--font-heading)', color: 'var(--color-primary)' }}>Amount</TableCell>
-                <TableCell sx={{ fontFamily: 'var(--font-heading)', color: 'var(--color-primary)' }}>Date</TableCell>
-                <TableCell sx={{ fontFamily: 'var(--font-heading)', color: 'var(--color-primary)' }}>Status</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {invoices.map((invoice) => (
-                <TableRow key={invoice.id} sx={{ '&:hover': { background: 'var(--color-highlight)' } }}>
-                  <TableCell sx={{ fontFamily: 'var(--font-body)' }}>{invoice.id}</TableCell>
-                  <TableCell sx={{ fontFamily: 'var(--font-body)' }}>{invoice.vendor}</TableCell>
-                  <TableCell sx={{ fontFamily: 'var(--font-body)' }}>${invoice.amount}</TableCell>
-                  <TableCell sx={{ fontFamily: 'var(--font-body)' }}>{invoice.date}</TableCell>
-                  <TableCell sx={{ fontFamily: 'var(--font-body)' }}>{invoice.status}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      )}
+          Welcome to NGO Financial Management System
+        </Typography>
+        <Typography
+          variant="body1"
+          sx={{
+            fontFamily: 'var(--font-body)',
+            color: 'var(--color-text-main)',
+          }}
+        >
+          Manage your NGO's finances efficiently and effectively.
+        </Typography>
+      </Box>
+      {getDashboardContent()}
     </DashboardLayout>
   );
 }; 

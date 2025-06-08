@@ -3,11 +3,15 @@ import { Box, Container, Typography, TextField, Button, Paper, Link, Alert } fro
 import { WebsiteHeader } from '../components/WebsiteHeader';
 import { WebsiteFooter } from '../components/WebsiteFooter';
 import { useNavigate, Link as RouterLink } from 'react-router-dom';
+import type { UserRole } from '../contexts/AuthContext';
 
 interface UserData {
   fullName: string;
   email: string;
   password: string;
+  role: UserRole;
+  status: 'pending' | 'approved' | 'rejected';
+  createdAt: string;
 }
 
 export const SignupPage = () => {
@@ -78,12 +82,17 @@ export const SignupPage = () => {
       fullName: formData.fullName,
       email: formData.email,
       password: formData.password,
+      role: 'volunteer',
+      status: 'pending',
+      createdAt: new Date().toISOString()
     };
 
     // Save user data
     if (saveUserData(userData)) {
       // Store email for auto-fill in login page
       localStorage.setItem('lastRegisteredEmail', formData.email);
+      // Show success message and redirect to login
+      alert('Registration successful! Please wait for admin approval to login.');
       navigate('/login');
     }
   };
@@ -121,7 +130,7 @@ export const SignupPage = () => {
                 mb: 3,
               }}
             >
-              Create Account
+              Volunteer Registration
             </Typography>
             <Typography
               variant="body1"
@@ -132,7 +141,7 @@ export const SignupPage = () => {
                 textAlign: 'center',
               }}
             >
-              Join NGO Financial Management System
+              Sign up to become a volunteer and help manage NGO finances
             </Typography>
 
             <Box component="form" onSubmit={handleSubmit} sx={{ width: '100%' }}>
@@ -243,13 +252,14 @@ export const SignupPage = () => {
                   fontSize: '1.1rem',
                   '&:hover': {
                     background: 'var(--color-secondary)',
+                    color: 'var(--color-primary-contrast)',
                   },
                 }}
               >
                 Sign Up
               </Button>
-              <Box sx={{ textAlign: 'center' }}>
-                <Typography variant="body2" sx={{ color: 'var(--color-accent)' }}>
+              <Box sx={{ textAlign: 'center', mt: 2 }}>
+                <Typography variant="body2" sx={{ color: 'var(--color-accent)', mb: 1 }}>
                   Already have an account?{' '}
                   <Link
                     component={RouterLink}

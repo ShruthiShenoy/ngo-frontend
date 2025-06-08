@@ -1,20 +1,23 @@
 import { useState, useEffect } from 'react';
-import { Box, Container, Typography, TextField, Button, Paper, Link, Alert } from '@mui/material';
+import { Box, Container, Typography, TextField, Button, Paper, Link, Alert, Tabs, Tab } from '@mui/material';
 import { WebsiteHeader } from '../components/WebsiteHeader';
 import { WebsiteFooter } from '../components/WebsiteFooter';
 import { useNavigate, Link as RouterLink, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import type { UserRole } from '../contexts/AuthContext';
 
 interface UserData {
   fullName: string;
   email: string;
   password: string;
+  role: UserRole;
 }
 
 export const LoginPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState(0);
   const navigate = useNavigate();
   const location = useLocation();
   const { login } = useAuth();
@@ -23,6 +26,17 @@ export const LoginPage = () => {
   const from = location.state?.from?.pathname || '/dashboard';
 
   useEffect(() => {
+    // Initialize dummy users if they don't exist in localStorage
+    const storedUsers = localStorage.getItem('users');
+    if (!storedUsers) {
+      const initialUsers: UserData[] = [
+        { fullName: 'Super Admin', email: 'superadmin@gmail.com', password: 'password123', role: 'super_admin' },
+        { fullName: 'Admin User', email: 'admin@gmail.com', password: 'password123', role: 'admin' },
+        { fullName: 'Volunteer User', email: 'volunteer@gmail.com', password: 'password123', role: 'volunteer' },
+      ];
+      localStorage.setItem('users', JSON.stringify(initialUsers));
+    }
+
     // Auto-fill email if user just registered
     const lastRegisteredEmail = localStorage.getItem('lastRegisteredEmail');
     if (lastRegisteredEmail) {
@@ -32,19 +46,38 @@ export const LoginPage = () => {
     }
   }, []);
 
-  const verifyCredentials = (email: string, password: string): boolean => {
+  const verifyCredentials = (
+    email: string,
+    password: string,
+    selectedRoleFromTab: UserRole
+  ): { success: boolean; role: UserRole | null } => {
     try {
-      // Check mock credentials first
-      if (email === 'admin@gmail.com' && password === 'password123') {
-        return true;
+      // Check super admin credentials
+      if (email === 'superadmin@gmail.com' && password === 'password123') {
+        return selectedRoleFromTab === 'super_admin' ? { success: true, role: 'super_admin' } : { success: false, role: null };
       }
       
-      // Then check registered users
+      // Check admin credentials
+      if (email === 'admin@gmail.com' && password === 'password123') {
+        return selectedRoleFromTab === 'admin' ? { success: true, role: 'admin' } : { success: false, role: null };
+      }
+      
+      // Check volunteer credentials
+      if (email === 'volunteer@gmail.com' && password === 'password123') {
+        return selectedRoleFromTab === 'volunteer' ? { success: true, role: 'volunteer' } : { success: false, role: null };
+      }
+      
+      // Check registered users
       const users = JSON.parse(localStorage.getItem('users') || '[]') as UserData[];
       const user = users.find(u => u.email === email && u.password === password);
-      return !!user;
+      
+      if (user) {
+        return user.role === selectedRoleFromTab ? { success: true, role: user.role } : { success: false, role: null };
+      }
+      
+      return { success: false, role: null };
     } catch {
-      return false;
+      return { success: false, role: null };
     }
   };
 
@@ -57,18 +90,40 @@ export const LoginPage = () => {
       return;
     }
 
+    const rolesMap: Record<number, UserRole> = {
+      0: 'volunteer',
+      1: 'admin',
+      2: 'super_admin',
+    };
+    const selectedRoleFromTab = rolesMap[activeTab];
+
     // Verify credentials
-    if (verifyCredentials(email, password)) {
-      // Set admin role for admin user
-      if (email === 'admin@gmail.com') {
-        login('admin');
-      } else {
-        login('user');
-      }
+    const { success, role } = verifyCredentials(email, password, selectedRoleFromTab);
+    
+    if (success && role) {
+      login(role, email);
       // Redirect to the return URL or dashboard
       navigate(from, { replace: true });
     } else {
-      setError('Invalid email or password');
+      setError('Invalid email or password for the selected role');
+    }
+  };
+
+  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+    setActiveTab(newValue);
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setEmail(value);
+
+    // Auto-select tab based on email
+    if (value === 'superadmin@gmail.com') {
+      setActiveTab(2); // Super Admin tab
+    } else if (value === 'admin@gmail.com') {
+      setActiveTab(1); // Admin tab
+    } else if (value === 'volunteer@gmail.com') {
+      setActiveTab(0); // Volunteer tab
     }
   };
 
@@ -118,6 +173,33 @@ export const LoginPage = () => {
             >
               Sign in to access your NGO Financial Management System
             </Typography>
+
+            <Tabs value={activeTab} onChange={handleTabChange} sx={{ mb: 3 }}>
+              <Tab label="Volunteer" />
+              <Tab label="Admin" />
+              <Tab label="Super Admin" />
+            </Tabs>
+
+            {/* Dummy credentials helper text */}
+            <Typography
+              variant="body2"
+              sx={{
+                fontFamily: 'var(--font-body)',
+                color: 'var(--color-accent)',
+                mb: 2,
+                textAlign: 'center',
+                fontSize: '0.8rem',
+              }}
+            >
+              Test Credentials:
+              <br />
+              Super Admin: superadmin@gmail.com / password123
+              <br />
+              Admin: admin@gmail.com / password123
+              <br />
+              Volunteer: volunteer@gmail.com / password123
+            </Typography>
+
             <Box component="form" onSubmit={handleSubmit} sx={{ width: '100%' }}>
               {error && (
                 <Alert severity="error" sx={{ mb: 2 }}>
@@ -134,7 +216,7 @@ export const LoginPage = () => {
                 autoComplete="email"
                 autoFocus
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={handleChange}
                 sx={{
                   '& .MuiOutlinedInput-root': {
                     '& fieldset': {
@@ -204,7 +286,7 @@ export const LoginPage = () => {
                       },
                     }}
                   >
-                    Sign up
+                    Sign up as Volunteer
                   </Link>
                 </Typography>
                 <Link

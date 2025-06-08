@@ -14,6 +14,7 @@ import {
 import AddIcon from '@mui/icons-material/Add';
 import { useNavigate } from 'react-router-dom';
 import { DashboardLayout } from '../components/DashboardLayout';
+import { useAuth } from '../contexts/AuthContext';
 
 const mockReports = [
   { id: 1, name: 'Monthly Financials', period: 'Mar 2024', created: '2024-03-31', status: 'Ready' },
@@ -26,6 +27,7 @@ export const ReportsPage = () => {
   const [error, setError] = useState<string | null>(null);
   const [reports, setReports] = useState(mockReports);
   const navigate = useNavigate();
+  const { hasPermission } = useAuth();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -41,23 +43,27 @@ export const ReportsPage = () => {
     fetchData();
   }, []);
 
+  const canCreateReports = hasPermission('create_reports');
+
   return (
     <DashboardLayout title="Reports">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 32 }}>
         <h1 style={{ fontFamily: 'var(--font-title)', color: 'var(--color-primary)', margin: 0 }}>Reports</h1>
-        <Button
-          variant="contained"
-          startIcon={<AddIcon />}
-          sx={{
-            background: 'var(--color-primary)',
-            color: 'var(--color-primary-contrast)',
-            fontFamily: 'var(--font-body)',
-            '&:hover': { background: 'var(--color-secondary)' },
-          }}
-          onClick={() => navigate('/reports/new')}
-        >
-          Generate Report
-        </Button>
+        {canCreateReports && (
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            sx={{
+              background: 'var(--color-primary)',
+              color: 'var(--color-primary-contrast)',
+              fontFamily: 'var(--font-body)',
+              '&:hover': { background: 'var(--color-secondary)' },
+            }}
+            onClick={() => navigate('/reports/new')}
+          >
+            Generate Report
+          </Button>
+        )}
       </div>
       {error && (
         <Alert severity="error" sx={{ mb: 2, fontFamily: 'var(--font-body)' }}>{error}</Alert>

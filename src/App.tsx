@@ -4,7 +4,7 @@ import { AuthProvider, useAuth } from './contexts/AuthContext';
 import PrivateRoute from './routes/PrivateRoute';
 
 // Import your pages here
-import { HomePage } from './pages/HomePage';
+// import { HomePage } from './pages/HomePage';
 import { AboutPage } from './pages/AboutPage';
 import { ContactPage } from './pages/ContactPage';
 import { LoginPage } from './pages/LoginPage';
@@ -17,6 +17,7 @@ import { AccountsPage } from './pages/AccountsPage';
 import { ReportsPage } from './pages/ReportsPage';
 import { AddInvoicePage } from './pages/AddInvoicePage';
 import { NotAuthorized } from './pages/NotAuthorized';
+import { UserManagementPage } from './pages/UserManagementPage';
 
 // PublicRoute component — redirects logged in users from public pages
 const PublicRoute = ({ children }: { children: React.ReactNode }) => {
@@ -72,25 +73,29 @@ function App() {
 
           {/* Protected routes */}
           <Route
-            path="/home"
-            element={
-              <PrivateRoute>
-                <HomePage />
-              </PrivateRoute>
-            }
-          />
-          <Route
             path="/dashboard"
             element={
-              <PrivateRoute requiredRole="admin">
+              <PrivateRoute>
                 <DashboardPage />
               </PrivateRoute>
             }
           />
+
+          {/* Super Admin routes */}
+          <Route
+            path="/users"
+            element={
+              <PrivateRoute requiredRole="super_admin">
+                <UserManagementPage />
+              </PrivateRoute>
+            }
+          />
+
+          {/* Admin and Super Admin routes */}
           <Route
             path="/invoices"
             element={
-              <PrivateRoute requiredRole="admin">
+              <PrivateRoute requiredPermission="view_all_invoices">
                 <InvoicesPage />
               </PrivateRoute>
             }
@@ -98,40 +103,42 @@ function App() {
           <Route
             path="/invoices/new"
             element={
-              <PrivateRoute requiredRole="admin">
+              <PrivateRoute requiredPermission="create_invoices">
                 <AddInvoicePage />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/accounts"
-            element={
-              <PrivateRoute requiredRole="accountant">
-                <AccountsPage />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/accounts/new"
-            element={
-              <PrivateRoute requiredRole="accountant">
-                <AddAccountPage />
               </PrivateRoute>
             }
           />
           <Route
             path="/reports"
             element={
-              <PrivateRoute requiredRole="manager">
+              <PrivateRoute requiredPermission="view_all_reports">
                 <ReportsPage />
               </PrivateRoute>
             }
           />
           <Route
-            path="/reports/new"
+            path="/accounts"
             element={
-              <PrivateRoute requiredRole="manager">
-                <GenerateReportPage />
+              <PrivateRoute requiredPermission="view_all_funds">
+                <AccountsPage />
+              </PrivateRoute>
+            }
+          />
+
+          {/* Volunteer routes */}
+          <Route
+            path="/my-invoices"
+            element={
+              <PrivateRoute requiredPermission="view_invoices">
+                <InvoicesPage />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/my-reports"
+            element={
+              <PrivateRoute requiredPermission="view_own_reports">
+                <ReportsPage />
               </PrivateRoute>
             }
           />
