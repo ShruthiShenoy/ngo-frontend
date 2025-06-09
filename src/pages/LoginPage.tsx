@@ -13,6 +13,13 @@ interface UserData {
   role: UserRole;
 }
 
+// Define initial users outside of component to avoid recreation
+const initialUsers: UserData[] = [
+  { fullName: 'Super Admin', email: 'superadmin@gmail.com', password: 'password123', role: 'super_admin' },
+  { fullName: 'Admin User', email: 'admin@gmail.com', password: 'password123', role: 'admin' },
+  { fullName: 'Volunteer User', email: 'volunteer@gmail.com', password: 'password123', role: 'volunteer' },
+];
+
 export const LoginPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -29,12 +36,18 @@ export const LoginPage = () => {
     // Initialize dummy users if they don't exist in localStorage
     const storedUsers = localStorage.getItem('users');
     if (!storedUsers) {
-      const initialUsers: UserData[] = [
-        { fullName: 'Super Admin', email: 'superadmin@gmail.com', password: 'password123', role: 'super_admin' },
-        { fullName: 'Admin User', email: 'admin@gmail.com', password: 'password123', role: 'admin' },
-        { fullName: 'Volunteer User', email: 'volunteer@gmail.com', password: 'password123', role: 'volunteer' },
-      ];
       localStorage.setItem('users', JSON.stringify(initialUsers));
+    } else {
+      // Ensure the dummy users exist in the stored users
+      const users = JSON.parse(storedUsers) as UserData[];
+      const missingDummyUsers = initialUsers.filter(user => 
+        !users.some(u => u.email === user.email)
+      );
+      
+      if (missingDummyUsers.length > 0) {
+        const updatedUsers = [...users, ...missingDummyUsers];
+        localStorage.setItem('users', JSON.stringify(updatedUsers));
+      }
     }
 
     // Auto-fill email if user just registered
@@ -114,7 +127,7 @@ export const LoginPage = () => {
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
+    const { value } = e.target;
     setEmail(value);
 
     // Auto-select tab based on email
